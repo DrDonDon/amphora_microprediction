@@ -5,15 +5,17 @@ Created on Thu Apr 30 10:23:54 2020
 @author: Isaac
 """
 
+# import amphora modules
 from amphora.client import AmphoraDataRepositoryClient, Credentials
 import amphoraMicroPrediction
+
+# import microprediction modules
 from pandemic.example_parameters import TOY_TOWN
 from pandemic.conventions import VULNERABLE, INFECTED, SYMPTOMATIC, POSITIVE, RECOVERED, DECEASED, STATE_DESCRIPTIONS
 
-
+# import generic modules
 import numpy as np
 import os
-
 import time
 import timeit
 import mlflow
@@ -29,8 +31,10 @@ mlflow.log_metric("time_to_complete", 0)
 mlflow.log_metric("ensembles_simulated",0)
 mlflow.log_metric("run_complete",0)
 
+# Set number of runs
 N_S=30
 
+# Define variables
 column_names = {
     't': 't',
     'day': 'day',
@@ -62,13 +66,14 @@ params = TOY_TOWN
 mlflow.log_param("run_type",param_set)
 
 # provide your login credentials
+amphora_username = os.getenv('username')
+amphora_password = os.getenv('password')
 
-#amphora_id = amphoraMicroPrediction.create_amphora(params,param_set,amphora_username,amphora_password)
-amphora_id = "29ae56f6-cd0d-4e20-b6d2-9acf8fbf2495"
-
-                         
+# Create new amphora
+amphora_id = amphoraMicroPrediction.create_amphora(params,param_set,amphora_username,amphora_password)
+                        
 ## Run pandemic and push to Amphora
-for n_s in range(24, N_S):
+for n_s in range(N_S):
     amphora_run_id = n_s
     print("Starting Simulation...")
     
@@ -78,7 +83,6 @@ for n_s in range(24, N_S):
     
     print("Finished run")
     mlflow.log_metric("ensembles_simulated",n_s+1)
-    time.sleep(5)
     
     
 # Wrap up MLflow loggins    
