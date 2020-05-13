@@ -9,3 +9,5 @@ The main code, [run.py](https://github.com/DrDonDon/amphora_microprediction/blob
 
 ## Supporting code
 [amphoraMicroPrediction.py](https://github.com/DrDonDon/amphora_microprediction/blob/master/amphoraMicroPrediction.py) is a module for running run.py. It is tailored for pandemic atm but will be expanded to support MicroPrediction in general
+
+[requirements.txt](https://github.com/DrDonDon/amphora_microprediction/blob/master/requirements.txt) is a list of all requirements to run this code.
