@@ -20,4 +20,4 @@ amphora_id = "29ae56f6-cd0d-4e20-b6d2-9acf8fbf2495"
 
 # Share amphora
 amphora = client.get_amphora(amphora_id)
-amphora.share_with("isaacdonnelly@outlook.com")
+amphora.share_with("coyote@acme.org")
