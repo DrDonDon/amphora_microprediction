@@ -10,8 +10,8 @@ from amphora.client import AmphoraDataRepositoryClient, Credentials
 import os
 
 # Login to amphora
-amphora_username=get.os('username')
-amphora_password=get.os('password')
+amphora_username=os.getenv('username')
+amphora_password=os.getenv('password')
 credentials = Credentials(username=amphora_username, password=amphora_password)
 client = AmphoraDataRepositoryClient(credentials)
 
