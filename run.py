@@ -21,6 +21,15 @@ import timeit
 import mlflow
 from datetime import datetime
 
+# provide your login credentials
+amphora_username = os.getenv('username')
+amphora_password = os.getenv('password')
+
+if not amphora_username:
+    raise Exception("Amphora Username is required. Use an environment variable: username")
+if not amphora_password:
+    raise Exception("Amphora Password is required. Use an environment variable: password")
+
 ## Set up log metrics
 start = timeit.timeit()
 sep='_'
@@ -64,10 +73,6 @@ data = {
 param_set = "TOY_TOWN"
 params = TOY_TOWN
 mlflow.log_param("run_type",param_set)
-
-# provide your login credentials
-amphora_username = os.getenv('username')
-amphora_password = os.getenv('password')
 
 # Create new amphora
 amphora_id = amphoraMicroPrediction.create_amphora(params,param_set,amphora_username,amphora_password)
