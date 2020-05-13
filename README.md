@@ -11,3 +11,17 @@ The main code, [run.py](https://github.com/DrDonDon/amphora_microprediction/blob
 [amphoraMicroPrediction.py](https://github.com/DrDonDon/amphora_microprediction/blob/master/amphoraMicroPrediction.py) is a module for running run.py. It is tailored for pandemic atm but will be expanded to support MicroPrediction in general
 
 [requirements.txt](https://github.com/DrDonDon/amphora_microprediction/blob/master/requirements.txt) is a list of all requirements to run this code.
+
+## Three top uses of amphora with Microprediction
+Microprediction users can use Amphora Data as an open source data collaboration tool
+
+### Contribute your data to the community
+Microprediction community members need a way to share data. They can test their models and showcase their prowess but can't store and share the data. Amphora lets them do this for free. Users can share their data with one-line commands or put it on the public repo for all to see
+
+### Use someone elses model output
+Any user of Amphora can get someone elses data on the platform. Many models are now open source but users typically need to run them themselves to get the data and insights, something which can be very computationally expensive. Instead, they can access the data instanly from Amphora.
+
+### Use as a reference for article on linkedin etc
+It is very easy to add a link to an Amphora for a reference in any article or github mention. Any reader can quickly access the data, in the same way they can access the code on github.
+
+
