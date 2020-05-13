@@ -12,6 +12,8 @@ The main code, [run.py](https://github.com/DrDonDon/amphora_microprediction/blob
 
 [requirements.txt](https://github.com/DrDonDon/amphora_microprediction/blob/master/requirements.txt) is a list of all requirements to run this code.
 
+[share_amphora.py](https://github.com/DrDonDon/amphora_microprediction/blob/master/share_amphora.py) is a simple file to share the Amphora with any user via their username/email address
+
 ## Three top uses of amphora with Microprediction
 Microprediction users can use Amphora Data as an open source data collaboration tool
 
