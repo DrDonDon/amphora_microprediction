@@ -73,18 +73,15 @@ data = {
 param_set = "TOY_TOWN"
 params = TOY_TOWN
 mlflow.log_param("run_type",param_set)
-
-# Create new amphora
-amphora_id = amphoraMicroPrediction.create_amphora(params,param_set,amphora_username,amphora_password)
-                        
+                  
 ## Run pandemic and push to Amphora
 for n_s in range(N_S):
+    
     amphora_run_id = n_s
     print("Starting Simulation...")
+    print(n_s)
     
-    a10a_info = dict({'id': amphora_id,  'username': amphora_username, 'password': amphora_password, 'run_id': amphora_run_id})
-    data = amphoraMicroPrediction.simulate_w_a10a(params, a10a_info, callback=amphoraMicroPrediction.c)
-    amphoraMicroPrediction.push_summary_timeseries(data,a10a_info,column_names)
+    data = simulate(params, callback=amphoraMicroPrediction.amphora_callback)
     
     print("Finished run")
     mlflow.log_metric("ensembles_simulated",n_s+1)
