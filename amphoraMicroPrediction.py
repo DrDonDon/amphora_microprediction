@@ -84,10 +84,8 @@ def create_amphora(params,param_name,username,password):    # Create new amphora
     return amphora_id
 
 
-def push_summary_timeseries(data,a10a_info,column_names):   #push signals to amphora
-    credentials = Credentials(username=a10a_info['username'], password=a10a_info['password'])
-    client = AmphoraDataRepositoryClient(credentials)
-    amphora = client.get_amphora(a10a_info['id'])   
+def push_summary_timeseries(data,column_names, client, amphora_id):   #push signals to amphora
+    amphora = client.get_amphora('amphora_id')   
     df = pd.DataFrame(data)
     df = df.rename(columns=column_names)
     new_df = df.drop(['day', 'day_fraction'], axis=1)
@@ -95,91 +93,47 @@ def push_summary_timeseries(data,a10a_info,column_names):   #push signals to amp
     amphora.push_signals_dict_array(Signal)
     return
 
-def push_snapshot(positions,status,current_time,a10a_info):         #push snapshot of data to amphora
-    credentials = Credentials(username=a10a_info['username'], password=a10a_info['password'])
-    client = AmphoraDataRepositoryClient(credentials)
+def push_snapshot(positions,status,current_time,client,amphora_id):         #push snapshot of data to amphora
+
     sep = '_'
     stor=[]
     for i in range(len(status)):
         stor.append([positions[i][0],positions[i][1],status[i]])
     #print(stor)
-    filename = sep.join(["Positions_and_status_at_day",str(current_time),'for_run',str(a10a_info['run_id']),'.csv'])
+    filename = sep.join(["Positions_and_status_at_day",str(current_time),'for_run_104.csv'])
     df = pd.DataFrame(np.array(stor))
     df.columns = ["position_x","position_y","health_status"]
     df.to_csv(filename)
-    amphora = client.get_amphora(a10a_info['id']) 
+    amphora = client.get_amphora(amphora_id) 
     amphora.push_file(filename)
     os.remove(filename)
     return
     
     
-def simulate_w_a10a(params, a10a_info, plt=None, plot_hourly=None, xlabel=None, callback=plot_callback , ad_upload = True):
-    """ OU Pandemic simulation
-    :param params:       dict of dict as per pandemic.conventions
-    :param plt:          Handle to matplotlib plot
-    :param plot_hourly:  Bool        Set False to speed up, True to see commuting
-    :param xlabel:       str         Label for plot
-    :param callback:     Any function taking home, work, day, params, positions, status (e.g. for plotting, saving etc)
-    :return: None        Use the callback
-    """
+def amphora_callback(day, day_fraction, home, work, positions, status, params, step_no, plot_hourly, plt):
+    
 
-    if plot_hourly is None:
-        plot_hourly = params['geometry']['n']<50000  # Hack, remove
-
-    # Initialize a city's geography and its denizens
-    num, num_initially_infected = int(params['geometry']['n']),int(params['geometry']['i'])
-    num_times_of_day = int(params['motion']['t'])
-    precision  = int(params['geometry']['p'])
-    home, work = home_and_work_locations(geometry_params=params['geometry'],num=num)
-    positions  = nudge(home,w=0.05*params['motion']['w'])
-    status     = np.random.permutation([INFECTED]*num_initially_infected +[VULNERABLE]*(num-num_initially_infected))
-    time_step  = 1.0/num_times_of_day
-
-    # Population drifts to work and back, incurring viral load based on proximity to others who are infected
-    day = 0
-    while any( s in [ INFECTED ] for s in status ):
-
-        day = day+1
-        for step_no, day_fraction in enumerate(times_of_day(num_times_of_day)):
-            stationary = [ s in [DECEASED, POSITIVE] for s in status ]
-            attractors = destinations(status, day_fraction, home, work)
-            positions  = evolve_positions(positions=positions, motion_params=params['motion'], attractors=attractors,
-                                          time_step=time_step , stationary=stationary )
-
-            exposed = newly_exposed(positions=positions, status=status, precision=precision)
-            current_time = day+day_fraction
-            if abs(current_time % 1) <0.002:
-                print(current_time)
-                if ad_upload == True:
-                    #print(positions+status)
-                    push_snapshot(positions,status,current_time,a10a_info)
-            status = contact_progression(status=status, health_params=params['health'], exposed=exposed)
-            status = individual_progression(status, health_params=params['health'], day_fraction=time_step )
-            if callback:
-                callback(day=day, day_fraction=day_fraction , home=home, work=work, positions=positions, status=status, params=params, step_no=step_no, plot_hourly=plot_hourly, plt=plt)
-    pprint(Counter([list(STATE_DESCRIPTIONS.values())[s] for s in status]))
-    return data
-
-
-def data_append(row: dict, key: str):
-    if key in row:
-        data[key].append(row[key])
-    else:
-        data[key].append(0)
-
-
-# callback(day=day, day_fraction=day_fraction , home=home, work=work, positions=positions, status=status, params=params, step_no=step_no, plot_hourly=plot_hourly, plt=plt)
-def c(day, day_fraction, home, work, positions, status, params, step_no, plot_hourly, plt ):
-    t0 = datetime(2020, 4, 15, 3,30,0,0)
-    unique, counts = np.unique(status, return_counts=True)
-    d = dict(zip(unique, counts))
-    # append things
-    data['day'].append(day)
-    data['day_fraction'].append(day_fraction)
-    data['t'].append(t0 + timedelta(days=day, minutes=day_fraction * 3600))
-    data_append(d, VULNERABLE)
-    data_append(d, INFECTED)
-    data_append(d, SYMPTOMATIC)
-    data_append(d, POSITIVE)
-    data_append(d, RECOVERED)
-    data_append(d, DECEASED)
+    current_time = day + day_fraction
+    if abs(current_time % 1) <0.002:
+        # Login to amphoradata.com
+        try:
+            username=os.getenv('amphora_username')
+            password=os.getenv('amphora_password')
+            credentials = Credentials(username,password) 
+            client = AmphoraDataRepositoryClient(credentials)
+        except:
+            print("Couldn't login. Please sign up at amphoradata.com/regsiter if you need a free account.")
+                   
+        # Check if amphora exists
+        amphora_id = os.environ["amphora_id"]
+        if amphora_id == None:
+            param_name = "HOMESICK"
+            amphora_id = create_amphora(params,param_name,username,password)
+        
+        # Push file (end of each day)
+        print(current_time)
+        push_snapshot(positions,status,current_time,client,amphora_id)
+            
+        # Push signal (when infected go to 0)
+        if(sum(s in [ INFECTED ] for s in status )==0):
+            push_summary_timeseries(data,column_names, client, amphora_id)
